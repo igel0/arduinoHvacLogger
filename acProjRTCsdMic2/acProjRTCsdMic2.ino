@@ -109,7 +109,7 @@ void loop () {
 
 
     Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+    Serial.print(daysOfTheWeek[now.dayOfWeek()]);
     Serial.print(") ");
     Serial.print(micReading);
     Serial.println();
@@ -132,7 +132,7 @@ void loop () {
     myFile.print(now.second(), DEC);
 
     myFile.print(" (");
-    myFile.print(daysOfTheWeek[now.dayOfTheWeek()]);
+    myFile.print(daysOfTheWeek[now.dayOfWeek()]);
     myFile.print(") ");
     myFile.print(micReading);
     myFile.println();
