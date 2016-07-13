@@ -1,12 +1,13 @@
 /*
  * My arduino and A/c project
-
+ * uses spi, i2c and serial debug messages
 
 */
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
 #include "RTClib.h"
 #include <SD.h>
+#include <SPI.h>
 
 #if defined(ARDUINO_ARCH_SAMD)
 // for Zero, output on USB Serial console, remove line below if using programming port to program the Zero!
