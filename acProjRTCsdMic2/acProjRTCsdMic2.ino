@@ -4,8 +4,8 @@
 
 */
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
-#include <Wire.h>
-#include "RTClib.h"
+#include "Wire.h"
+#include <RTClib.h>
 #include <SD.h>
 #include <SPI.h>
 
@@ -110,7 +110,7 @@ void loop () {
 
 
     Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfWeek()]);
+    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
     Serial.print(") ");
     Serial.print(micReading);
     Serial.println();
@@ -133,7 +133,7 @@ void loop () {
     myFile.print(now.second(), DEC);
 
     myFile.print(" (");
-    myFile.print(daysOfTheWeek[now.dayOfWeek()]);
+    myFile.print(daysOfTheWeek[now.dayOfTheWeek()]);
     myFile.print(") ");
     myFile.print(micReading);
     myFile.println();
