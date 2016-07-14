@@ -77,6 +77,10 @@ void setup () {
     // if the file didn't open, print an error:
     Serial.println("error opening test.txt");
   }
+  Serial.println("Started recording from here-");
+  myFile.println("Started recording from here-");
+  myFile.flush();
+  delay(100); //so microphone can get settled
 
 }
 
@@ -145,7 +149,7 @@ void loop () {
       myFile.flush();
       prevMicSamp = micReading;
     }
-    delay(10000);
+    delay(1000);
    
 }
 
