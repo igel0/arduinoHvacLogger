@@ -4,7 +4,7 @@
 
 */
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
-#include "Wire.h"
+#include <Wire.h>
 #include <RTClib.h>
 #include <SD.h>
 #include <SPI.h>
@@ -16,6 +16,9 @@
 
 //function declarations
 bool mic_sample();
+
+//variables
+static bool prevMicSamp = 0; //init at off-will only start recording when ac goes on-has local scope
 
 //for rtc
 RTC_DS1307 rtc;
@@ -90,60 +93,62 @@ void loop () {
     DateTime now = rtc.now(); //get time
     bool micReading = mic_sample(); //read mic
 
-//    first print to screen
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(" ");
-  
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-//    add unixtime
-//    Serial.print(' ');
-//    Serial.print(now.unixtime(), DEC);
+//    only record if a/c status has changed
+    if (micReading != prevMicSamp)
+    { 
 
-
-
-    Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    Serial.print(") ");
-    Serial.print(micReading);
-    Serial.println();
+  //    first print to screen
+      Serial.print(now.year(), DEC);
+      Serial.print('/');
+      Serial.print(now.month(), DEC);
+      Serial.print('/');
+      Serial.print(now.day(), DEC);
+      Serial.print(" ");
     
-    
-    Serial.println();
-
-//    then print to sd card
-    myFile.print(now.year(), DEC);
-    myFile.print('/');
-    myFile.print(now.month(), DEC);
-    myFile.print('/');
-    myFile.print(now.day(), DEC);
-    myFile.print(" ");
+      Serial.print(now.hour(), DEC);
+      Serial.print(':');
+      Serial.print(now.minute(), DEC);
+      Serial.print(':');
+      Serial.print(now.second(), DEC);
+  //    add unixtime
+  //    Serial.print(' ');
+  //    Serial.print(now.unixtime(), DEC);
   
-    myFile.print(now.hour(), DEC);
-    myFile.print(':');
-    myFile.print(now.minute(), DEC);
-    myFile.print(':');
-    myFile.print(now.second(), DEC);
-
-    myFile.print(" (");
-    myFile.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    myFile.print(") ");
-    myFile.print(micReading);
-    myFile.println();
-
-//    save it to the sd card
-    myFile.flush();
-
+      Serial.print(" (");
+      Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+      Serial.print(") ");
+      Serial.print(micReading);
+      Serial.println();
+      Serial.println();
+  
+  //    then print to sd card
+      myFile.print(now.year(), DEC);
+      myFile.print('/');
+      myFile.print(now.month(), DEC);
+      myFile.print('/');
+      myFile.print(now.day(), DEC);
+      myFile.print(" ");
+    
+      myFile.print(now.hour(), DEC);
+      myFile.print(':');
+      myFile.print(now.minute(), DEC);
+      myFile.print(':');
+      myFile.print(now.second(), DEC);
+  
+      myFile.print(" (");
+      myFile.print(daysOfTheWeek[now.dayOfTheWeek()]);
+      myFile.print(") ");
+      myFile.print(micReading);
+      myFile.println();
+  
+  //    save it to the sd card
+      myFile.flush();
+      prevMicSamp = micReading;
+    }
     delay(10000);
    
 }
+
 bool mic_sample() 
 {
    const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
