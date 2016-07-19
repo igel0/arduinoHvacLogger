@@ -110,7 +110,7 @@ void setup () {
 
 void loop () {
   
-    Serial.println("Beginning of loop");
+//    Serial.println("Beginning of loop");
 
     DateTime now = rtc.now(); //get time
     bool micReading = mic_sample(); //read mic
@@ -188,13 +188,29 @@ void loop () {
       }
       
       }
-     
+      
+     //this only runs when it just turned 11pm 
+    //or it just turned 8 am
     //print to file that records percentage
-    //it is 11pm and it just turned 11pm 
-    //or it is 8am and it just turned 8 am
-    if ( (now.hour() == HOUR_23 && previousHour != now.hour() ) 
-    || (now.hour() == HOUR_8 && previousHour != now.hour() ) )
+//    if ( (now.hour() == HOUR_23 && previousHour != now.hour() ) 
+//    || (now.hour() == HOUR_8 && previousHour != now.hour() ) )
+
+    if (previousHour != now.minute() )
+
     {
+      //if mic is currently on we want to record that time too
+      if (micReading)
+      {
+        onTime += (now.unixtime() - startTime); //accumulate time on
+        Serial.print("accumulating on time ");
+        Serial.println(onTime, DEC);
+        //restart the start time
+        startTime = now.unixtime();
+        Serial.print(F("mic was on so startTime is "));
+        Serial.println(startTime);
+      }
+
+      //calculate the percentage of on time of this period
       float percentage = float(onTime) / float(now.unixtime() - periodStartTime) * 100;
       //print date
       myFile2.print(now.year(), DEC);
@@ -215,6 +231,13 @@ void loop () {
       //print percent
       myFile2.print(percentage);
       myFile2.println("%");
+      //debug stuff
+      myFile2.print(F("onTime: "));
+      myFile2.print(onTime);
+      myFile2.print(F(" now: "));
+      myFile2.print(now.unixtime());
+      myFile2.print(F(" periodStart: "));
+      myFile2.println(periodStartTime);
 
       //i forgot this!!
       myFile2.flush();
@@ -238,28 +261,38 @@ void loop () {
       Serial.print(percentage);
       Serial.println("%");
 
+            //debug stuff
+      Serial.print(F("onTime: "));
+      Serial.print(onTime);
+      Serial.print(F(" now: "));
+      Serial.print(now.unixtime());
+      Serial.print(F(" periodStart: "));
+      Serial.println(periodStartTime);
+
+
       //reset values
       periodStartTime = now.unixtime();
       onTime = 0;
-    Serial.print("periodStartTime");
+    Serial.print(F("periodStartTime"));
     Serial.println(periodStartTime);
-    Serial.print("onTime ");
+    Serial.print(F("onTime "));
     Serial.println(onTime);
 
-      if (micReading) 
-      {
-        startTime = now.unixtime();
-        Serial.print("mic was on so startTime is ");
-    Serial.println(startTime);
-
-      }
+//      if (micReading) 
+//      {
+//        startTime = now.unixtime();
+//        Serial.print(F("mic was on so startTime is "));
+//    Serial.println(startTime);
+//
+//      }
 
     
     }
 
-    previousHour = now.hour(); //update this variable
-    Serial.print("previousHour ");
-    Serial.println(previousHour);
+//    previousHour = now.hour(); //update this variable
+    previousHour = now.minute();
+//    Serial.print(F("previousHour "));
+//    Serial.println(previousHour);
     delay(1000);
    
 }
@@ -295,7 +328,7 @@ bool mic_sample()
    double volts = (peakToPeak * 3.3) / 1024;  // convert to volts
 
    Serial.print(volts);
-   Serial.println(" Volts");
+   Serial.println(F(" Volts"));
    
    if (volts >= .04) onOff = 1;
    else onOff = 0;
