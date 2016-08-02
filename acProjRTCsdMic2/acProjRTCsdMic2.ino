@@ -11,10 +11,6 @@
 #define HOUR_23 23 //11pm
 #define HOUR_8 8  //8 am
 
-#if defined(ARDUINO_ARCH_SAMD)
-// for Zero, output on USB Serial console, remove line below if using programming port to program the Zero!
-   #define Serial SerialUSB
-#endif
 
 //function declarations
 bool mic_sample();
@@ -24,7 +20,7 @@ static bool prevMicRead = 0; //init at off-will only start recording when ac goe
 static uint32_t periodStartTime; //time at the beginning of period we are recording for on time percentage
 static uint32_t startTime; //time when the system turned on from being off
 static uint32_t onTime = 0; // accumulator of time the system is on
- uint8_t previousHour; //keeps track of what hour it was the last time in the loop
+static uint8_t previousHour; //keeps track of what hour it was the last time in the loop
 
 //for rtc
 RTC_DS1307 rtc;
@@ -34,14 +30,14 @@ File myFile, myFile2;
 
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
+
+
 void setup () {
 
 //General init
-
   Serial.begin(57600);
 
 //RTC init
-
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1);
@@ -50,7 +46,7 @@ void setup () {
   if (! rtc.isrunning()) {
     Serial.println("RTC is NOT running!");
     // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     // This line sets the RTC with an explicit date & time, for example to set
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
@@ -59,10 +55,7 @@ void setup () {
 //  SD card init
 
   Serial.print("Initializing SD card...");
-  // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
-  // Note that even if it's not used as the CS pin, the hardware SS pin 
-  // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
-  // or the SD library functions will not work. 
+  // CS pin 10
    pinMode(10, OUTPUT);
  
   if (!SD.begin(10)) {
@@ -70,9 +63,8 @@ void setup () {
     return;
   }
   Serial.println("initialization done.");
- 
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
+
+ //open file onOff.txt
   myFile = SD.open("onOff.txt", FILE_WRITE);
 
  if (!myFile) { 
@@ -81,8 +73,6 @@ void setup () {
   }
 
 //open second file
-    // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
   myFile2 = SD.open("prcnt.txt", FILE_WRITE);
 
  if (!myFile2) { 
@@ -109,13 +99,12 @@ void setup () {
 }
 
 void loop () {
-  
-//    Serial.println("Beginning of loop");
 
     DateTime now = rtc.now(); //get time
     bool micReading = mic_sample(); //read mic
 
-//    only record if a/c status has changed
+//    only enters if status has changed
+//    only records a/c is on or off if status has changed
     if (micReading != prevMicRead)
     { 
 
@@ -132,9 +121,6 @@ void loop () {
       Serial.print(now.minute(), DEC);
       Serial.print(':');
       Serial.print(now.second(), DEC);
-  //    add unixtime
-  //    Serial.print(' ');
-  //    Serial.print(now.unixtime(), DEC);
   
       Serial.print(" (");
       Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
@@ -189,25 +175,24 @@ void loop () {
       
       }
       
-     //this only runs when it just turned 11pm 
+     //only enters if it just turned 11pm 
     //or it just turned 8 am
     //print to file that records percentage
-//    if ( (now.hour() == HOUR_23 && previousHour != now.hour() ) 
-//    || (now.hour() == HOUR_8 && previousHour != now.hour() ) )
+    //&& and logical has precedence over || or logical
+    if  ((now.hour() == HOUR_23 || now.hour() == HOUR_8) && previousHour != now.hour() ) 
 
-    if (previousHour != now.minute() )
+//    if (previousHour != now.minute() )
 
     {
       //if mic is currently on we want to record that time too
       if (micReading)
       {
         onTime += (now.unixtime() - startTime); //accumulate time on
-        Serial.print("accumulating on time ");
+        Serial.print(F("accumulating on time "));
         Serial.println(onTime, DEC);
         //restart the start time
         startTime = now.unixtime();
-        Serial.print(F("mic was on so startTime is "));
-        Serial.println(startTime);
+        Serial.println(F("mic was on "));
       }
 
       //calculate the percentage of on time of this period
@@ -289,8 +274,8 @@ void loop () {
     
     }
 
-//    previousHour = now.hour(); //update this variable
-    previousHour = now.minute();
+      previousHour = now.hour(); //update this variable
+//    previousHour = now.minute();
 //    Serial.print(F("previousHour "));
 //    Serial.println(previousHour);
     delay(1000);
@@ -330,7 +315,7 @@ bool mic_sample()
    Serial.print(volts);
    Serial.println(F(" Volts"));
    
-   if (volts >= .04) onOff = 1;
+   if (volts > .05) onOff = 1;
    else onOff = 0;
    
 
