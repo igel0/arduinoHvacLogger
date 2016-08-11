@@ -278,13 +278,13 @@ void loop () {
 //    previousHour = now.minute();
 //    Serial.print(F("previousHour "));
 //    Serial.println(previousHour);
-    delay(1000);
+    delay(5000);
    
 }
 
 bool mic_sample() 
 {
-   const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
+   const int sampleWindow = 500; // Sample window width in mS (50 mS = 20Hz)
    unsigned int sample;
    unsigned long startMillis= millis();  // Start of sample window
    unsigned int peakToPeak = 0;   // peak-to-peak level
@@ -315,7 +315,7 @@ bool mic_sample()
    Serial.print(volts);
    Serial.println(F(" Volts"));
    
-   if (volts > .05) onOff = 1;
+   if (volts > .15) onOff = 1;
    else onOff = 0;
    
 
